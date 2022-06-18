@@ -5,8 +5,14 @@ die() {
 	exit 1
 }
 
-# 
-: ${XBPS_MULTILIB_ROOT:=/usr}
+# Try to be sensible about the multilib root
+if [ -z "$XBPS_MULTILIB_ROOT" ]; then
+	if [ -d "/multilib" ]; then
+		XBPS_MULTILIB_ROOT="/multilib"
+	else
+		XBPS_MULTILIB_ROOT="/usr"
+	fi
+fi
 
 # XBPS_ARCH and command are derived from the base name
 XBPS_CMD="${0##*/}"

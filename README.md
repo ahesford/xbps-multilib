@@ -29,7 +29,8 @@ The script expects each alternate root to reside in the directory
     ${XBPS_MULTILIB_ROOT}/${XBPS_ARCH}
 
 Set the variable `$XBPS_MULTILIB_ROOT` to any desired directory. If the
-variable is unset, a default of `/usr` is assumed; this yields multilib roots
+variable is unset, a default of `/multilib` is assumed if that directory
+exists; otherwise, `/usr` will be used as the root, yielding multilib trees
 such as, *e.g.*, `/usr/i686`.
 
 > The multilib arrangement supported by this script relies on symlinking
@@ -61,17 +62,19 @@ and `aarch64 -> armv7l`.
    will provide a functional setup for managing an `i686` multilib root.
 
 3. Set `$XBPS_MULTILIB_ROOT` to the desired root for all multilib
-   installations, or rely on the default `/usr` root.
+   installations, or rely on the default root selection behavior. (Subsequent
+   steps assume the variable is set and use it as a stand-in for your preferred
+   path.)
 
 4. Create the target root, including an XBPS configuration directory
 
-       mkdir -p "${XBPS_MULTILIB_ROOT:-/usr}/<ARCH>/etc/xbps.d
+       mkdir -p "${XBPS_MULTILIB_ROOT}/<ARCH>/etc/xbps.d
 
    where `<ARCH>` is your desired XBPS architecture.
 
 5. Add XBPS configuration files to the directory. Specifically, ensure that
 
-       ${XBPS_MULTILIB_ROOT:-/usr}/<ARCH>/etc/xbps.d/00-repository-main.conf
+       ${XBPS_MULTILIB_ROOT}/<ARCH>/etc/xbps.d/00-repository-main.conf
 
    exists and specifies the repositories from which you would like to pull.
 
@@ -102,18 +105,18 @@ and `aarch64 -> armv7l`.
 
 11. Link `/usr/lib32` to the `usr/lib` subdirectory of your desired target.
 
-        ln -s ${XBPS_MULTILIB_ROOT:-/usr}/<ARCH>/usr/lib /usr/lib32
+        ln -s ${XBPS_MULTILIB_ROOT}/<ARCH>/usr/lib /usr/lib32
 
     where, again, `<ARCH>` is the architecture you intend to target.
 
 12. Link the target C library in `/usr/lib`. The name of the library depends on
     the architecture. For `i686`,
 
-        ln -s ${XBPS_MULTILIB_ROOT:-/usr}/i686/usr/lib/ld-linux.so.2 /usr/lib
+        ln -s ${XBPS_MULTILIB_ROOT}/i686/usr/lib/ld-linux.so.2 /usr/lib
 
     For `armv7l`,
 
-        ln -s ${XBPS_MULTILIB_ROOT:-/usr}/armv7l/usr/lib/ld-linux-armhf.so.3 /usr/lib
+        ln -s ${XBPS_MULTILIB_ROOT}/armv7l/usr/lib/ld-linux-armhf.so.3 /usr/lib
 
     For other architectures, you will need to do some discovery. (Whether a
     multilib setup with `musl` is feasible is unknown.)
@@ -125,7 +128,7 @@ and `aarch64 -> armv7l`.
 
 13. Add the target to your path, *e.g.*,
 
-        export PATH="${PATH}:/usr/i686/usr/bin"
+        export PATH="${PATH}:${XBPS_MULTILIB_ROOT}/i686/usr/bin"
 
 14. Run your 32-bit executables!
 
